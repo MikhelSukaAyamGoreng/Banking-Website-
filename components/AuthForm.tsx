@@ -9,10 +9,14 @@ import { useForm } from "react-hook-form"
 import FormInput from "@/components/FormInput"
 import { Form } from "@/components/ui/form" // 1. Added this import
 import { Button } from "@/components/ui/button"
-import {formSchema} from "@/lib/utils"
+import {authFormSchema} from "@/lib/utils"
+import { Loader2 } from 'lucide-react'
 
 const AuthForm = ({ type }: { type: string }) => {
   const [user, setUser] = useState(null);
+  const [isLoading, setisLoading] = useState(false);
+
+  const formSchema = authFormSchema(type);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -20,11 +24,18 @@ const AuthForm = ({ type }: { type: string }) => {
       email: "",
       password: "",
       username: "",
+      firstname: "",
+      lastname: "",
+      postalcode: "",
+      address: "",
+      dateofbirth: ""
     },
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    setisLoading(true)
     console.log(values)
+    setisLoading(false);
   }
 
   return (
@@ -54,6 +65,44 @@ const AuthForm = ({ type }: { type: string }) => {
           {/* 2. Wrap your inputs in the Form provider and HTML form tag */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {type === 'sign-up' && (
+                  <>
+                    <FormInput 
+                      control = {form.control}
+                      name = "firstname"
+                      label = "First Name"
+                      placeholder = "Enter your first name"
+                    />
+
+                    <FormInput 
+                      control = {form.control}
+                      name = "lastname"
+                      label = "Last Name"
+                      placeholder = "Enter your last name"
+                    />
+
+                    <FormInput 
+                      control = {form.control}
+                      name = "address"
+                      label = "Address"
+                      placeholder = "Enter your address"
+                    />
+
+                    <FormInput 
+                      control = {form.control}
+                      name = "postalcode"
+                      label = "Postal Code"
+                      placeholder = "Please enter the correct postal code"
+                    />
+                    
+                    <FormInput 
+                      control = {form.control}
+                      name = "dateofbirth"
+                      label = "Date of Birth"
+                      placeholder = "YYYY-MM-DD"
+                    />
+                  </>
+              )}
               <FormInput 
                 control={form.control}
                 name="username"
@@ -75,11 +124,28 @@ const AuthForm = ({ type }: { type: string }) => {
                 placeholder="Please enter 5 or more characters"
               />
           
-              <Button type="submit" className="form-btn w-full">
-                {type === 'sign-in' ? 'Sign In' : 'Sign Up'}
-              </Button>
+              <div className = "flex flex-col gap-4">
+                <Button type="submit" disabled = {isLoading} className="form-btn w-full">
+                  {isLoading ? ( 
+                  <>
+                    <Loader2 size = {20} className = "animate-spin" />
+                    &nbsp; Loading...
+                  </>)
+                    : type === 'sign-in'? 'Sign in': 'Sign up'
+                  }     
+                  </Button>
+              </div>
             </form>
           </Form>
+
+          <footer className = "flex justify-center gap-1">
+                <p className = "text-14 font-normal text-gray-600">
+                  {type === 'sign-in'? "Don't have an account?": "Account is already registered"}
+                </p>
+                <Link className = "form-link" href = {type === 'sign-in'? '/sign-up': '/sign-in'}>
+                  {type === 'sign-in'? "Sign Up": "Sign In"}
+                </Link>
+          </footer>
         </>
       )}
     </section>

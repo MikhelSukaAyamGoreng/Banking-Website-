@@ -5,12 +5,10 @@ import { FormControl, FormField, FormLabel, FormMessage } from "./ui/form"
 import { Input } from "./ui/input"
 import { Control, FieldPath } from 'react-hook-form' 
 import { z } from 'zod'
-
+import { authFormSchema } from '@/lib/utils'
 // 1. Define the schema shape so the component knows what fields exist
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(5)
-})
+
+const formSchema = authFormSchema('sign-up');
 
 interface CustomInput {
   control: Control<z.infer<typeof formSchema>>, // Correct way to type control
