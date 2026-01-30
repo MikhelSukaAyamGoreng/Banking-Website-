@@ -11,11 +11,13 @@ import { Form } from "@/components/ui/form" // 1. Added this import
 import { Button } from "@/components/ui/button"
 import {authFormSchema} from "@/lib/utils"
 import { Loader2 } from 'lucide-react'
+import {useRouter} from 'next/navigation'
+import { signIn, signUp } from '@/lib/actions/user.actions'
 
 const AuthForm = ({ type }: { type: string }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setisLoading] = useState(false);
-
+  const router = useRouter();
   const formSchema = authFormSchema(type);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -32,10 +34,30 @@ const AuthForm = ({ type }: { type: string }) => {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setisLoading(true)
-    console.log(values)
-    setisLoading(false);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setisLoading(true);
+    
+    try {
+      
+
+      if (type === 'sign-up') {
+        const newUser = await signUp(data);
+        
+        setUser(newUser);
+      }
+      if (type === 'sign-in') {
+        const response = await signIn({
+          email: values.email,
+          password: values.password,
+        })
+
+        if (response) router.push('/')
+      }
+    } catch (error) {
+      console.log(error);
+    }finally {
+      setisLoading(false);
+    }
   }
 
   return (
@@ -67,39 +89,49 @@ const AuthForm = ({ type }: { type: string }) => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {type === 'sign-up' && (
                   <>
-                    <FormInput 
-                      control = {form.control}
-                      name = "firstname"
-                      label = "First Name"
-                      placeholder = "Enter your first name"
-                    />
-
-                    <FormInput 
-                      control = {form.control}
-                      name = "lastname"
-                      label = "Last Name"
-                      placeholder = "Enter your last name"
-                    />
-
-                    <FormInput 
-                      control = {form.control}
-                      name = "address"
-                      label = "Address"
-                      placeholder = "Enter your address"
-                    />
-
-                    <FormInput 
-                      control = {form.control}
-                      name = "postalcode"
-                      label = "Postal Code"
-                      placeholder = "Please enter the correct postal code"
-                    />
                     
+                    <div className = "flex gap-4">
+                      <FormInput 
+                        control = {form.control}
+                        name = "firstname"
+                        label = "First Name"
+                        placeholder = "Enter your first name"
+                      />
+
+                      <FormInput 
+                        control = {form.control}
+                        name = "lastname"
+                        label = "Last Name"
+                        placeholder = "Enter your last name"
+                      />
+                    </div>
+                    <div className = "flex gap-4">
+                      <FormInput 
+                        control = {form.control}
+                        name = "address"
+                        label = "Address"
+                        placeholder = "Enter your address"
+                      />
+
+                      <FormInput 
+                        control = {form.control}
+                        name = "postalcode"
+                        label = "Postal Code"
+                        placeholder = "Please enter the correct postal code"
+                      />
+                    </div>
+
                     <FormInput 
                       control = {form.control}
                       name = "dateofbirth"
                       label = "Date of Birth"
                       placeholder = "YYYY-MM-DD"
+                    />
+                    <FormInput 
+                      control={form.control}
+                      name="email"
+                      label="Email" 
+                      placeholder="Please enter the correct email format"
                     />
                   </>
               )}
@@ -108,13 +140,6 @@ const AuthForm = ({ type }: { type: string }) => {
                 name="username"
                 label="Username" 
                 placeholder="Please enter 3 or more characters"
-              />
-              
-              <FormInput 
-                control={form.control}
-                name="email"
-                label="Email" 
-                placeholder="Please enter the correct email format"
               />
 
               <FormInput 
